@@ -54,7 +54,6 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -159,6 +158,9 @@ Desktop.ini
 
 # Generated config files (keep base templates)
 config-yaml/*.generated.yaml
+
+# Demo/example log files
+demo-logs/
 
 
 # Streamlit
