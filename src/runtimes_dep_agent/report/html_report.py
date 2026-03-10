@@ -381,21 +381,22 @@ def _section_deployment(verdict: str, deployment_text: str, matrix: list) -> str
     badge = _verdict_badge(verdict)
 
     matrix_html = ""
-    if matrix:
-        deployable = [e for e in matrix if e.get("deployable")]
-        blocked = [e for e in matrix if not e.get("deployable")]
+    safe_matrix = [e for e in (matrix if isinstance(matrix, list) else []) if isinstance(e, dict)]
+    if safe_matrix:
+        deployable = [e for e in safe_matrix if e.get("deployable", False)]
+        blocked = [e for e in safe_matrix if not e.get("deployable", False)]
         matrix_html += '<div class="matrix-grid">'
         matrix_html += '<div class="matrix-col"><h4>Deployable</h4>'
         if deployable:
             for e in deployable:
-                matrix_html += f'<div class="matrix-item pass">&#10003; <strong>{_esc(e["model_name"])}</strong><br><small>{_esc(e.get("reason", ""))}</small></div>'
+                matrix_html += f'<div class="matrix-item pass">&#10003; <strong>{_esc(e.get("model_name", "Unknown"))}</strong><br><small>{_esc(e.get("reason", ""))}</small></div>'
         else:
             matrix_html += '<p class="muted">None</p>'
         matrix_html += "</div>"
         matrix_html += '<div class="matrix-col"><h4>Non-deployable</h4>'
         if blocked:
             for e in blocked:
-                matrix_html += f'<div class="matrix-item fail">&#10007; <strong>{_esc(e["model_name"])}</strong><br><small>{_esc(e.get("reason", ""))}</small></div>'
+                matrix_html += f'<div class="matrix-item fail">&#10007; <strong>{_esc(e.get("model_name", "Unknown"))}</strong><br><small>{_esc(e.get("reason", ""))}</small></div>'
         else:
             matrix_html += '<p class="muted">None</p>'
         matrix_html += "</div></div>"

@@ -6,6 +6,7 @@ import argparse
 import logging
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -271,62 +272,75 @@ def main() -> None:
 
     progress = ProgressLogger(total_steps=5)
 
-    # Per-run artifact directory to avoid shared-repo concurrency and data-leak risks
-    run_dir = Path(tempfile.mkdtemp(prefix="agent_run_"))
-    info_dir = run_dir / "info"
-    info_dir.mkdir(parents=True, exist_ok=True)
+    # Per-run artifact directory (use app-provided path when running under Streamlit UI)
+    env_info_dir = os.environ.get("AGENT_RUN_INFO_DIR")
+    if env_info_dir:
+        info_dir = Path(env_info_dir)
+        info_dir.mkdir(parents=True, exist_ok=True)
+        run_dir = None  # app owns it; no cleanup
+    else:
+        run_dir = Path(tempfile.mkdtemp(prefix="agent_run_"))
+        info_dir = run_dir / "info"
+        info_dir.mkdir(parents=True, exist_ok=True)
 
-    # 2. oc login
-    oc_login_cmd = args.oc_login or os.environ.get("OC_LOGIN_COMMAND")
-    if oc_login_cmd:
-        _run_oc_login(oc_login_cmd, progress)
-
-    # 3. Set env vars from CLI flags
-    api_key = _apply_env_overrides(args)
-
-    # 4. Build the agent
-    progress.section("Initializing Agent")
-    progress.step("Loading configuration & building specialists")
-    agent = LLMAgent(
-        api_key=api_key,
-        model=args.model,
-        bootstrap_config=args.config,
-        info_dir=info_dir,
-    )
-    progress.success("Agent ready")
-
-    # 5. Stream the supervisor pipeline with live output
-    output_text = _run_streaming(agent, progress)
-
-    # Write summary to per-run info dir
-    summary_path = info_dir / "supervisor_summary.txt"
-    with open(summary_path, "w") as f:
-        f.write(output_text)
-
-    # Print final report
-    print(f"\n{'=' * 60}")
-    print(f"{BOLD}  SUPERVISOR REPORT{RESET}")
-    print(f"{'=' * 60}\n")
-    print(output_text)
-    print(f"\n{'=' * 60}")
-
-    # 6. Always generate report
-    progress.step("Generating HTML report")
     try:
-        from .report.html_report import generate_html_report
+        # 2. oc login
+        oc_login_cmd = args.oc_login or os.environ.get("OC_LOGIN_COMMAND")
+        if oc_login_cmd:
+            _run_oc_login(oc_login_cmd, progress)
 
-        report_path = generate_html_report(
+        # 3. Set env vars from CLI flags
+        api_key = _apply_env_overrides(args)
+
+        # 4. Build the agent
+        progress.section("Initializing Agent")
+        progress.step("Loading configuration & building specialists")
+        agent = LLMAgent(
+            api_key=api_key,
+            model=args.model,
+            bootstrap_config=args.config,
             info_dir=info_dir,
-            output_path=Path(args.report_output),
-            agent_output=output_text,
-            preflight_results=[r.to_dict() for r in results],
         )
-        progress.success(f"Report saved to {report_path}")
-    except Exception as exc:
-        progress.fail(f"Report generation failed: {exc}")
+        progress.success("Agent ready")
 
-    elapsed = time.time() - start_time
-    progress.done(elapsed)
+        # 5. Stream the supervisor pipeline with live output
+        output_text = _run_streaming(agent, progress)
+
+        # Write summary to per-run info dir
+        summary_path = info_dir / "supervisor_summary.txt"
+        with open(summary_path, "w") as f:
+            f.write(output_text)
+
+        # Print final report
+        print(f"\n{'=' * 60}")
+        print(f"{BOLD}  SUPERVISOR REPORT{RESET}")
+        print(f"{'=' * 60}\n")
+        print(output_text)
+        print(f"\n{'=' * 60}")
+
+        # 6. Always generate report
+        progress.step("Generating HTML report")
+        try:
+            from .report.html_report import generate_html_report
+
+            report_path = generate_html_report(
+                info_dir=info_dir,
+                output_path=Path(args.report_output),
+                agent_output=output_text,
+                preflight_results=[r.to_dict() for r in results],
+            )
+            progress.success(f"Report saved to {report_path}")
+        except Exception as exc:
+            progress.fail(f"Report generation failed: {exc}")
+
+        elapsed = time.time() - start_time
+        progress.done(elapsed)
+    finally:
+        if run_dir is not None:
+            try:
+                shutil.rmtree(run_dir)
+            except OSError:
+                pass
 
 
 if __name__ == "__main__":
