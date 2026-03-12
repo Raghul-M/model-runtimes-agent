@@ -48,7 +48,7 @@ _THEME_CSS = """
     --text: #2d3436;
     --text-muted: #636e72;
     --border: #dfe6e9;
-    --accent: #0984e3;
+    --accent: #e63946;
     --green: #00b894;
     --red: #d63031;
     --yellow: #fdcb6e;
@@ -59,16 +59,104 @@ _THEME_CSS = """
     font-family: 'Red Hat Text', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+.stMainBlockContainer {
+    padding-top: 0.5rem !important;
+}
+
 section[data-testid="stSidebar"] {
-    background-color: var(--surface);
-    border-right: 1px solid var(--border);
+    background-color: #1e2a38;
+    border-right: none;
 }
 
 section[data-testid="stSidebar"] .stMarkdown h1,
 section[data-testid="stSidebar"] .stMarkdown h2,
 section[data-testid="stSidebar"] .stMarkdown h3 {
     font-family: 'Red Hat Display', sans-serif;
-    color: var(--sidebar-bg);
+    color: #ffffff;
+}
+
+section[data-testid="stSidebar"] .stMarkdown p,
+section[data-testid="stSidebar"] .stMarkdown label,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] .stMarkdown span,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+    color: #ffffff;
+}
+
+section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] label p {
+    color: #ffffff !important;
+}
+
+section[data-testid="stSidebar"] .stTextInput input {
+    background-color: #ffffff !important;
+    color: #1e2a38 !important;
+}
+
+section[data-testid="stSidebar"] .stTextInput input::placeholder {
+    color: #636e72 !important;
+    opacity: 1 !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] {
+    background-color: #ffffff !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span {
+    color: #1e2a38 !important;
+}
+
+section[data-testid="stSidebar"] .stButton > button {
+    background-color: #ffffff !important;
+    color: #1e2a38 !important;
+    border: 1px solid #dfe6e9 !important;
+}
+
+section[data-testid="stSidebar"] .stButton > button * {
+    color: #1e2a38 !important;
+}
+
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background-color: #f0f0f0 !important;
+    color: #1e2a38 !important;
+}
+
+section[data-testid="stSidebar"] .stFileUploader [data-testid="stFileUploaderDropzone"] {
+    background-color: #ffffff !important;
+    border-radius: 6px;
+}
+
+section[data-testid="stSidebar"] .stFileUploader [data-testid="stFileUploaderDropzone"] * {
+    color: #1e2a38 !important;
+}
+
+section[data-testid="stSidebar"] .stFileUploader [data-testid="stFileUploaderDropzone"] small {
+    color: #636e72 !important;
+}
+
+section[data-testid="stSidebar"] hr {
+    border-color: #2c3e50 !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] {
+    background-color: #ffffff !important;
+    border: 1px solid #dfe6e9 !important;
+    border-radius: 6px;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] * {
+    color: #1e2a38 !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] code {
+    color: #1e2a38 !important;
+    background-color: #f5f6fa !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stExpander"] pre {
+    background-color: #f5f6fa !important;
+    color: #1e2a38 !important;
 }
 
 h1, h2, h3, h4 {
@@ -77,21 +165,23 @@ h1, h2, h3, h4 {
 }
 
 .stProgress > div > div > div > div {
-    background-color: var(--accent);
+    background-color: #e63946;
 }
 
 div.stButton > button[kind="primary"] {
-    background-color: var(--accent);
+    background-color: #e63946;
     border: none;
     border-radius: var(--radius);
     font-weight: 600;
     font-family: 'Red Hat Display', sans-serif;
     letter-spacing: 0.3px;
+    color: #fff;
 }
 
 div.stButton > button[kind="primary"]:hover {
-    background-color: #0773c7;
+    background-color: #c5303b;
     border: none;
+    color: #fff;
 }
 
 div.stDownloadButton > button {
@@ -147,6 +237,87 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"] {
 .stAlert {
     border-radius: var(--radius);
 }
+
+section[data-testid="stSidebar"] > div:first-child {
+    padding-top: 0 !important;
+}
+
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    padding-top: 0.5rem !important;
+}
+
+section[data-testid="stSidebar"] .stMarkdown h1 {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+section[data-testid="stSidebar"] .stMarkdown h2,
+section[data-testid="stSidebar"] .stMarkdown h3 {
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+    font-size: 0.92rem;
+}
+
+section[data-testid="stSidebar"] hr {
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+section[data-testid="stSidebar"] .stElementContainer {
+    margin-bottom: 0 !important;
+}
+
+section[data-testid="stSidebar"] .stTextInput input {
+    border: 1px solid #dfe6e9 !important;
+    border-radius: 6px;
+}
+
+section[data-testid="stSidebar"] .stTextInput input:focus {
+    border-color: #dfe6e9 !important;
+    box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox input {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] {
+    border: 1px solid #dfe6e9 !important;
+    border-radius: 6px !important;
+    outline: none !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] div[class*="control"],
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div,
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] > div > div {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background: transparent !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"]:focus-within {
+    border-color: #1e2a38 !important;
+    box-shadow: 0 0 0 2px rgba(30, 42, 56, 0.15) !important;
+}
+
+button[data-testid="stBaseButton-secondary"][kind="secondary"]:has(+ div #stop_agent_btn),
+div[data-testid="stButton"] button[kind="secondary"] {
+    background-color: #e63946 !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 600;
+}
+
+div[data-testid="stButton"] button[kind="secondary"]:hover {
+    background-color: #c5303b !important;
+    color: #ffffff !important;
+}
+
+div[data-testid="stButton"] button[kind="secondary"] * {
+    color: #ffffff !important;
+}
 </style>
 """
 st.markdown(_THEME_CSS, unsafe_allow_html=True)
@@ -196,6 +367,12 @@ if "preflight_results" not in st.session_state:
     st.session_state.preflight_results = None
 if "run_info_dir" not in st.session_state:
     st.session_state.run_info_dir = None
+if "agent_pid" not in st.session_state:
+    st.session_state.agent_pid = None
+if "registry_host" not in st.session_state:
+    st.session_state.registry_host = os.environ.get("REGISTRY_HOST") or None
+if "agent_interrupted" not in st.session_state:
+    st.session_state.agent_interrupted = False
 
 # Helper: per-run info dir when agent was started from UI, else repo info/
 def _get_info_dir() -> Path:
@@ -333,8 +510,15 @@ def load_deployment_matrix():
         return []
 
 
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
+
+def _strip_ansi(text: str) -> str:
+    return _ANSI_RE.sub('', text)
+
+
 def stream_agent_command(cmd, env, cwd, live_output_placeholder, timeout_sec=2100, tail_lines=200):
     """Run a command and stream stdout/stderr into the UI while capturing full output."""
+    import signal
     output_lines = []
     start_time = time.time()
 
@@ -346,7 +530,10 @@ def stream_agent_command(cmd, env, cwd, live_output_placeholder, timeout_sec=210
         bufsize=1,
         env=env,
         cwd=cwd,
+        preexec_fn=os.setsid,
     )
+
+    st.session_state.agent_pid = proc.pid
 
     assert proc.stdout is not None
     selector = selectors.DefaultSelector()
@@ -355,8 +542,22 @@ def stream_agent_command(cmd, env, cwd, live_output_placeholder, timeout_sec=210
     if live_output_placeholder is not None:
         live_output_placeholder.code("Waiting for output...")
 
+    interrupted = False
     try:
         while True:
+            if st.session_state.get("agent_interrupted"):
+                try:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                    proc.wait(timeout=5)
+                except Exception:
+                    try:
+                        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                    except Exception:
+                        proc.kill()
+                output_lines.append("\n--- Agent interrupted by user ---")
+                interrupted = True
+                break
+
             if time.time() - start_time > timeout_sec:
                 proc.terminate()
                 try:
@@ -370,22 +571,24 @@ def stream_agent_command(cmd, env, cwd, live_output_placeholder, timeout_sec=210
                 line = key.fileobj.readline()
                 if not line:
                     continue
-                output_lines.append(line.rstrip("\n"))
+                output_lines.append(_strip_ansi(line.rstrip("\n")))
                 if live_output_placeholder is not None:
                     tail = "\n".join(output_lines[-tail_lines:])
                     live_output_placeholder.code(tail)
 
             if proc.poll() is not None:
                 for line in proc.stdout:
-                    output_lines.append(line.rstrip("\n"))
+                    output_lines.append(_strip_ansi(line.rstrip("\n")))
                 if live_output_placeholder is not None and output_lines:
                     tail = "\n".join(output_lines[-tail_lines:])
                     live_output_placeholder.code(tail)
                 break
     finally:
         selector.close()
+        st.session_state.agent_pid = None
 
-    return proc.returncode or 0, "\n".join(output_lines)
+    rc = -1 if interrupted else (proc.returncode or 0)
+    return rc, "\n".join(output_lines)
 
 # Function to extract QA summary from agent output
 def extract_qa_summary(agent_output: str) -> tuple[str, str]:
@@ -603,14 +806,6 @@ def parse_gpu_info():
 
 # Sidebar for API key and YAML upload
 with st.sidebar:
-    logo_b64 = _load_logo_b64()
-    if logo_b64:
-        st.markdown(
-            f'<div style="text-align:center;padding:8px 0 16px 0;">'
-            f'<img src="data:image/png;base64,{logo_b64}" alt="OpenShift AI" style="width:180px;">'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
     st.title("Configuration")
     
     # Gemini API Key input (mandatory)
@@ -643,7 +838,21 @@ with st.sidebar:
         os.environ["OCI_REGISTRY_PULL_SECRET"] = oci_secret_input
         st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Configured</span>', unsafe_allow_html=True)
     
-    st.divider()
+    # Registry Host input (optional)
+    st.subheader("Registry Host")
+    registry_host_input = st.text_input(
+        "Enter Registry Host",
+        value=st.session_state.registry_host or "",
+        placeholder="e.g., registry.redhat.io",
+        help="Override the registry host for QA tests (optional). If blank, it is auto-detected from the model-car YAML images."
+    )
+    
+    if registry_host_input and registry_host_input.strip():
+        st.session_state.registry_host = registry_host_input.strip()
+        os.environ["REGISTRY_HOST"] = registry_host_input.strip()
+        st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Configured</span>', unsafe_allow_html=True)
+    else:
+        st.session_state.registry_host = None
     
     # vLLM Runtime Image input (optional)
     st.subheader("vLLM Runtime Image")
@@ -670,26 +879,24 @@ with st.sidebar:
     ]
     
     # Get current index for selectbox
-    current_index = 0  # Default to placeholder
+    current_index = None  # Default to placeholder
     if st.session_state.runtime_backend and st.session_state.runtime_backend in runtime_backend_options:
-        current_index = runtime_backend_options.index(st.session_state.runtime_backend) + 1  # +1 for placeholder
+        current_index = runtime_backend_options.index(st.session_state.runtime_backend)
     
     runtime_backend_selected = st.selectbox(
         "Select Runtime Accelerator",
-        options=["Select an option..."] + runtime_backend_options,
+        options=runtime_backend_options,
         index=current_index,
+        placeholder="Select an option...",
         help="Select the runtime accelerator for vLLM deployment (optional)"
     )
     
-    # Update session state only if a valid option is selected (not placeholder)
-    if runtime_backend_selected and runtime_backend_selected != "Select an option...":
+    if runtime_backend_selected:
         st.session_state.runtime_backend = runtime_backend_selected
         st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Selected</span>', unsafe_allow_html=True)
-    elif runtime_backend_selected == "Select an option...":
+    else:
         st.session_state.runtime_backend = None
     
-    st.divider()
-
     # oc login command (optional)
     st.subheader("oc login Command")
     oc_login_input = st.text_input(
@@ -706,8 +913,6 @@ with st.sidebar:
     else:
         st.session_state.oc_login_command = None
 
-    st.divider()
-    
     # YAML file upload (mandatory)
     st.subheader("Upload Modelcar Images YAML File *")
     uploaded_file = st.file_uploader(
@@ -732,7 +937,7 @@ with st.sidebar:
         except Exception as e:
             st.error(f"Error reading file: {str(e)}")
     
-    st.divider()
+    st.markdown('<hr style="margin:0.5rem 0;border:none;border-top:1px solid #dfe6e9;">', unsafe_allow_html=True)
     
     # Reset button
     if st.button("Reset", width='stretch'):
@@ -770,84 +975,67 @@ with st.sidebar:
             "deployment": None,
             "qa": None
         }
+        st.session_state.agent_interrupted = False
+        st.session_state.agent_pid = None
         st.rerun()
 
 # Main interface — report-style header banner
-st.markdown("""
+_header_logo_b64 = _load_logo_b64()
+_header_logo_html = (
+    f'<img src="data:image/png;base64,{_header_logo_b64}" alt="OpenShift AI" '
+    f'style="height:120px; flex-shrink:0;">'
+    if _header_logo_b64 else ""
+)
+_github_svg = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="white" style="vertical-align:middle; margin-right:5px;">'
+    '<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 '
+    '0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53'
+    '.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 '
+    '0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 '
+    '1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 '
+    '3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 '
+    '8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>'
+)
+st.markdown(f"""
 <div style="
-    background: #1e2a38;
-    color: #fff;
-    padding: 22px 32px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    background: #ffffff;
+    color: #1e2a38;
+    padding: 12px 32px 4px 32px;
+    border-radius: 0px;
+    margin: 0 0 2px 0;
     display: flex;
     align-items: center;
     gap: 18px;
     flex-wrap: wrap;
     font-family: 'Red Hat Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    border: 1px solid #dfe6e9;
+    border-left: 5px solid #e63946;
+    border-top: 1px solid #dfe6e9;
+    box-shadow: 0 -1px 4px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06);
 ">
-    <h1 style="margin:0; font-size:1.55rem; color:#fff; font-weight:700;">
+    {_header_logo_html}
+    <h1 style="margin:0; font-size:1.55rem; color:#1e2a38; font-weight:700;">
         Model Runtimes Agent &mdash; OpenShift AI
     </h1>
-    <a href="https://github.com" target="_blank" style="text-decoration:none; margin-left:auto;">
-        <span style="background:#0984e3; color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; letter-spacing:0.3px;">
-            GitHub Repo
+    <a href="https://github.com/opendatahub-io/model-runtimes-agent" target="_blank" style="text-decoration:none; margin-left:auto;">
+        <span style="background:#24292f; color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; letter-spacing:0.3px; display:inline-flex; align-items:center;">
+            {_github_svg} GitHub Repo
         </span>
     </a>
     <a href="#" target="_blank" style="text-decoration:none;">
-        <span style="background:#00b894; color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; letter-spacing:0.3px;">
+        <span style="background:#e63946; color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; letter-spacing:0.3px;">
             Model Runtimes in RHOAI
         </span>
     </a>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
+
 
 # Start AI Agent button
 if not st.session_state.agent_started:
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("Start AI Agent", width='stretch', type="primary"):
-            if not st.session_state.gemini_api_key:
-                st.error("⚠️ Please enter your Gemini API key in the sidebar first!")
-            elif not st.session_state.oci_pull_secret:
-                st.error("⚠️ Please enter your OCI Registry Pull Secret in the sidebar first!")
-            elif not st.session_state.yaml_config:
-                st.error("⚠️ Please upload a YAML configuration file in the sidebar first!")
-            else:
-                # Environment variables are already set when user enters them in sidebar
-                try:
-                    # Ensure environment variables are set (they should already be set from sidebar inputs)
-                    if st.session_state.gemini_api_key:
-                        os.environ["GEMINI_API_KEY"] = st.session_state.gemini_api_key
-                    if st.session_state.oci_pull_secret:
-                        os.environ["OCI_REGISTRY_PULL_SECRET"] = st.session_state.oci_pull_secret
-                    
-                    # Save uploaded YAML to a file (YAML upload is mandatory)
-                    temp_dir = tempfile.gettempdir()
-                    config_path = os.path.join(temp_dir, "modelcar_config.yaml")
-                    with open(config_path, 'wb') as tmp_file:
-                        # Use original YAML content if available, otherwise dump parsed version
-                        if hasattr(st.session_state, 'yaml_content_raw') and st.session_state.yaml_content_raw:
-                            tmp_file.write(st.session_state.yaml_content_raw)
-                        else:
-                            # Fallback: dump parsed YAML if original content not available
-                            yaml.dump(st.session_state.yaml_config, tmp_file)
-                    
-                    st.session_state.config_path = config_path
-                    st.session_state.agent_started = True
-                    st.session_state.start_time = time.time()
-                    st.session_state.workflow_step = 1  # Start at step 1
-                    
-                    st.rerun()
-                except Exception as e:
-                    st.error(f"Failed to initialize: {str(e)}")
-                    st.exception(e)
-    st.info("Click 'Start AI Agent' to begin running the Agent")
-
     # Show pre-flight checks before agent starts
-    st.subheader("Pre-flight Checks")
+    st.subheader("System Checks")
     if st.session_state.preflight_results is None:
         with st.spinner("Checking dependencies..."):
             results = run_preflight_checks(quiet=True)
@@ -855,18 +1043,60 @@ if not st.session_state.agent_started:
                 {"name": r.name, "installed": r.installed, "version": r.version, "path": r.path}
                 for r in results
             ]
+    _preflight_badges = ""
     for r in st.session_state.preflight_results:
         if r["installed"]:
             ver = f" ({r['version']})" if r["version"] else ""
-            st.markdown(
-                f'<span style="background-color: #00b894; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600; margin-right: 8px;">{r["name"]} &#10003;{ver}</span>',
-                unsafe_allow_html=True,
+            _preflight_badges += (
+                f'<span style="background-color: #00b894; color: white; padding: 5px 14px; border-radius: 20px; '
+                f'font-size: 0.82rem; font-weight:600; margin-right: 8px; display:inline-block;">'
+                f'{r["name"]} &#10003;{ver}</span>'
             )
         else:
-            st.markdown(
-                f'<span style="background-color: #d63031; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600; margin-right: 8px;">{r["name"]} &#10007; NOT FOUND</span>',
-                unsafe_allow_html=True,
+            _preflight_badges += (
+                f'<span style="background-color: #d63031; color: white; padding: 5px 14px; border-radius: 20px; '
+                f'font-size: 0.82rem; font-weight:600; margin-right: 8px; display:inline-block;">'
+                f'{r["name"]} &#10007; NOT FOUND</span>'
             )
+    st.markdown(f'<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">{_preflight_badges}</div>', unsafe_allow_html=True)
+
+    st.markdown('<div style="margin-top: 1.5rem;"></div>', unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([3, 2, 3])
+    with col2:
+        if st.button("Start Runtime Agent", type="primary"):
+            if not st.session_state.gemini_api_key:
+                st.error("Please enter your Gemini API key in the sidebar first!")
+            elif not st.session_state.oci_pull_secret:
+                st.error("Please enter your OCI Registry Pull Secret in the sidebar first!")
+            elif not st.session_state.yaml_config:
+                st.error("Please upload a YAML configuration file in the sidebar first!")
+            else:
+                try:
+                    if st.session_state.gemini_api_key:
+                        os.environ["GEMINI_API_KEY"] = st.session_state.gemini_api_key
+                    if st.session_state.oci_pull_secret:
+                        os.environ["OCI_REGISTRY_PULL_SECRET"] = st.session_state.oci_pull_secret
+                    
+                    temp_dir = tempfile.gettempdir()
+                    config_path = os.path.join(temp_dir, "modelcar_config.yaml")
+                    with open(config_path, 'wb') as tmp_file:
+                        if hasattr(st.session_state, 'yaml_content_raw') and st.session_state.yaml_content_raw:
+                            tmp_file.write(st.session_state.yaml_content_raw)
+                        else:
+                            yaml.dump(st.session_state.yaml_config, tmp_file)
+                    
+                    st.session_state.config_path = config_path
+                    st.session_state.agent_started = True
+                    st.session_state.agent_interrupted = False
+                    st.session_state.agent_pid = None
+                    st.session_state.start_time = time.time()
+                    st.session_state.workflow_step = 1
+                    
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to initialize: {str(e)}")
+                    st.exception(e)
 else:
     # Status checks
     st.subheader("Status Checks")
@@ -888,27 +1118,19 @@ else:
     # Workflow progress
     st.subheader("Agent Workflow Progress")
     
-    # Define workflow steps
+    _ts = st.session_state.agent_timestamps
+    _agent_started = st.session_state.agent_start_time is not None
+
     workflow_steps = [
-        {"name": "Starting Supervisor Agent", "status": "pending"},
-        {"name": "Calling Configuration Agent", "status": "pending"},
-        {"name": "Calling Accelerator Agent", "status": "pending"},
-        {"name": "Calling Deployment Specialist", "status": "pending"},
-        {"name": "Calling QA Specialist", "status": "pending"},
-        # {"name": "Calling Reporting Agent", "status": "pending"},
+        {"name": "Starting Supervisor Agent",    "status": "completed" if _agent_started else "pending"},
+        {"name": "Calling Configuration Agent",  "status": "completed" if _ts.get("configuration") else ("in_progress" if _agent_started and not _ts.get("configuration") else "pending")},
+        {"name": "Calling Accelerator Agent",    "status": "completed" if _ts.get("accelerator") else ("in_progress" if _ts.get("configuration") and not _ts.get("accelerator") else "pending")},
+        {"name": "Calling Deployment Specialist","status": "completed" if _ts.get("deployment") else ("in_progress" if _ts.get("accelerator") and not _ts.get("deployment") else "pending")},
+        {"name": "Calling QA Specialist",        "status": "completed" if _ts.get("supervisor") else ("in_progress" if _ts.get("deployment") and not _ts.get("supervisor") else "pending")},
     ]
-    
-    # Update workflow steps based on current step
-    for i, step in enumerate(workflow_steps):
-        if i < st.session_state.workflow_step:
-            workflow_steps[i]["status"] = "completed"
-        elif i == st.session_state.workflow_step:
-            workflow_steps[i]["status"] = "in_progress"
-    
-    # Display progress
-    progress_value = st.session_state.workflow_step / len(workflow_steps) if len(workflow_steps) > 0 else 0.0
-    # Ensure progress value is between 0 and 1
-    progress_value = max(0.0, min(1.0, progress_value))
+
+    completed_count = sum(1 for s in workflow_steps if s["status"] == "completed")
+    progress_value = max(0.0, min(1.0, completed_count / len(workflow_steps)))
     st.progress(progress_value)
     
     # Display step statuses with badges
@@ -937,6 +1159,9 @@ else:
         st.subheader("Live Agent Output")
         st.caption("Streaming the last 200 lines while the agent runs.")
         live_output_placeholder = st.empty()
+        if st.button("Stop Agent", type="secondary", key="stop_agent_btn"):
+            st.session_state.agent_interrupted = True
+            st.warning("Interrupting agent process...")
     
     # Display outputs based on workflow step
     # Only show Configuration Agent Results if agent has started
@@ -1003,7 +1228,6 @@ else:
             
             st.markdown(f"""
             <div style="border: 1px solid #dfe6e9; border-radius: 8px; padding: 20px; margin-bottom: 16px; background-color: #f5f6fa;">
-            <h3 style="font-family: 'Red Hat Display', sans-serif; color: #1e2a38; margin-bottom: 12px;">Accelerator Summary</h3>
             <p style="font-size: 1.15em; font-weight: 700; color: #00b894; margin-bottom: 6px;">Total Number of GPU Nodes: {total_nodes}</p>
             <p style="font-size: 1.05em; font-weight: 700; color: #00b894; margin-bottom: 0;">Total Number of GPUs Available: {total_gpus}</p>
             </div>
@@ -1155,7 +1379,6 @@ else:
         
         st.markdown(f"""
         <div style="border: 1px solid #dfe6e9; border-radius: 8px; padding: 20px; max-height: 300px; overflow-y: auto; background-color: #f5f6fa;">
-        <h3 style="font-family: 'Red Hat Display', sans-serif; color: #1e2a38; margin-bottom: 10px;">QA Validation</h3>
         <p><strong>Status:</strong> <span style="color: {status_color}; font-weight: 700;">{qa_status.upper()}</span></p>
         <p style="font-size: 0.88rem; line-height: 1.7; color: #2d3436;">{qa_message}</p>
         </div>
@@ -1197,9 +1420,12 @@ else:
         with col1:
             st.metric("Models Executed", str(models_executed_summary))
         with col2:
-            st.metric("Time Taken", f"{elapsed_time:.2f} seconds")
+            elapsed_minutes = elapsed_time / 60
+            st.metric("Time Taken", f"{elapsed_minutes:.2f} minutes")
         
         st.markdown('<div style="margin-top: 20px;"><span style="background-color: #00b894; color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Deployment completed successfully</span></div>', unsafe_allow_html=True)
+
+        st.markdown('<div style="margin-top: 1.5rem;"></div>', unsafe_allow_html=True)
 
         # Generate and offer HTML report download (unique temp file per run to avoid cross-session races)
         try:
@@ -1233,136 +1459,135 @@ else:
         tab1, tab2 = st.tabs(["Agent Execution Timeline", "Resource Usage"])
         
         with tab1:
-            # Agent execution timeline with actual timestamps
             agent_timestamps = st.session_state.agent_timestamps
             agent_start = st.session_state.agent_start_time if st.session_state.agent_start_time else time.time() - elapsed_time
-            
-            # Calculate actual durations and start times
+
+            ordered_keys = [
+                ("configuration", "Configuration"),
+                ("accelerator", "Accelerator"),
+                ("deployment", "Deployment"),
+                ("supervisor", "Supervisor (Total)"),
+            ]
+
+            prev_end = agent_start
             agents_data = []
-            
-            # Supervisor Agent - from start until agent_output_text is available
-            if agent_timestamps["supervisor"]:
-                supervisor_start = 0
-                supervisor_duration = agent_timestamps["supervisor"] - agent_start
+            for key, label in ordered_keys:
+                ts = agent_timestamps.get(key)
+                if not ts:
+                    continue
+                if key == "supervisor":
+                    duration = ts - agent_start
+                    start_offset = 0.0
+                else:
+                    duration = max(0, ts - prev_end)
+                    start_offset = prev_end - agent_start
+                    prev_end = ts
                 agents_data.append({
-                    'Agent': 'Supervisor',
-                    'Start Time': supervisor_start,
-                    'Duration': supervisor_duration,
-                    'Status': 'Completed'
+                    'Agent': label,
+                    'Start': start_offset,
+                    'Duration': duration,
                 })
-            
-            # Configuration Agent - from start until models_info.json appears
-            if agent_timestamps["configuration"]:
-                config_start = 0
-                config_duration = agent_timestamps["configuration"] - agent_start
-                agents_data.append({
-                    'Agent': 'Configuration',
-                    'Start Time': config_start,
-                    'Duration': config_duration,
-                    'Status': 'Completed'
-                })
-            
-            # Accelerator Agent - from start until gpu_info.txt appears
-            if agent_timestamps["accelerator"]:
-                accel_start = 0
-                accel_duration = agent_timestamps["accelerator"] - agent_start
-                agents_data.append({
-                    'Agent': 'Accelerator',
-                    'Start Time': accel_start,
-                    'Duration': accel_duration,
-                    'Status': 'Completed'
-                })
-            
-            # Deployment Specialist - from start until deployment_info.txt appears
-            if agent_timestamps["deployment"]:
-                deploy_start = 0
-                deploy_duration = agent_timestamps["deployment"] - agent_start
-                agents_data.append({
-                    'Agent': 'Deployment',
-                    'Start Time': deploy_start,
-                    'Duration': deploy_duration,
-                    'Status': 'Completed'
-                })
-            
-            # QA Specialist - skip for now as requested
-            
-            # Create DataFrame from actual data
-            if agents_data:
-                agent_data = pd.DataFrame(agents_data)
-            else:
-                # Fallback to estimated times if no timestamps available yet
-                agent_data = pd.DataFrame({
-                    'Agent': ['Supervisor', 'Configuration', 'Accelerator', 'Deployment'],
-                    'Start Time': [0, elapsed_time*0.2, elapsed_time*0.4, elapsed_time*0.6],
-                    'Duration': [elapsed_time*0.2, elapsed_time*0.2, elapsed_time*0.2, elapsed_time*0.2],
-                    'Status': ['Completed', 'Completed', 'Completed', 'Completed']
-                })
-            
+
+            if not agents_data:
+                agents_data = [
+                    {'Agent': 'Configuration', 'Start': 0, 'Duration': elapsed_time * 0.25},
+                    {'Agent': 'Accelerator', 'Start': elapsed_time * 0.25, 'Duration': elapsed_time * 0.25},
+                    {'Agent': 'Deployment', 'Start': elapsed_time * 0.5, 'Duration': elapsed_time * 0.25},
+                    {'Agent': 'Supervisor (Total)', 'Start': 0, 'Duration': elapsed_time},
+                ]
+
+            agent_data = pd.DataFrame(agents_data)
+
             fig_timeline = go.Figure()
-            colors = ['#00b894', '#0984e3', '#1e2a38', '#fdcb6e', '#00b894', '#636e72']
-            
+            colors = ['#00b894', '#0984e3', '#fdcb6e', '#1e2a38', '#e63946', '#636e72']
+
             for i, row in agent_data.iterrows():
-                # Format duration text: show in minutes if > 99 seconds
                 duration = row['Duration']
                 if duration > 99:
                     duration_text = f"{duration / 60:.2f}m"
-                    hover_duration = f"{duration / 60:.2f} minutes ({duration:.2f}s)"
+                    hover_duration = f"{duration / 60:.2f} min ({duration:.1f}s)"
                 else:
-                    duration_text = f"{duration:.2f}s"
-                    hover_duration = f"{duration:.2f}s"
-                
+                    duration_text = f"{duration:.1f}s"
+                    hover_duration = f"{duration:.1f}s"
+
                 fig_timeline.add_trace(go.Bar(
                     x=[row['Agent']],
-                    y=[row['Duration']],
-                    base=[row['Start Time']],
-                    marker_color=colors[i],
+                    y=[duration],
+                    marker_color=colors[i % len(colors)],
                     name=row['Agent'],
                     text=[duration_text],
                     textposition='inside',
-                    hovertemplate=f"<b>{row['Agent']}</b><br>Duration: {hover_duration}<br>Status: {row['Status']}<extra></extra>"
+                    hovertemplate=f"<b>{row['Agent']}</b><br>Duration: {hover_duration}<extra></extra>"
                 ))
-            
+
             fig_timeline.update_layout(
-                title="Agent Execution Timeline",
+                title="Per-Agent Duration",
                 xaxis_title="Agent",
-                yaxis_title="Time (seconds)",
+                yaxis_title="Duration (seconds)",
                 barmode='group',
                 height=400,
                 showlegend=False,
                 hovermode='closest'
             )
-            st.plotly_chart(fig_timeline, width='stretch')
-        
+            st.plotly_chart(fig_timeline, use_container_width=True)
+
         with tab2:
-            # Resource usage chart
-            gpu_avail = get_value("resources.gpu_memory_available_gb", 44.99)
-            gpu_req = get_value("resources.gpu_memory_required_gb", 18.0)
-            disk_space = get_value("resources.disk_space_gb", 15.24)
-            
-            resource_data = pd.DataFrame({
-                'Resource': ['GPU Memory (Available)', 'GPU Memory (Required)', 'Disk Space'],
-                'Value': [gpu_avail, gpu_req, disk_space],
-                'Unit': ['GB', 'GB', 'GB']
-            })
-            
-            fig_resources = go.Figure()
-            fig_resources.add_trace(go.Bar(
-                x=resource_data['Resource'],
-                y=resource_data['Value'],
-                marker_color=['#00b894', '#fdcb6e', '#0984e3'],
-                text=[f"{v} {u}" for v, u in zip(resource_data['Value'], resource_data['Unit'])],
-                textposition='outside',
-                hovertemplate="<b>%{x}</b><br>Value: %{y} GB<extra></extra>"
-            ))
-            
-            fig_resources.update_layout(
-                title="Resource Usage Overview",
-                xaxis_title="Resource Type",
-                yaxis_title="Value (GB)",
-                height=400,
-                showlegend=False
-            )
-            st.plotly_chart(fig_resources, width='stretch')
+            gpu_info = parse_gpu_info()
+            model_info = load_model_info_from_json()
+
+            total_gpu_mem = 0.0
+            total_disk = 0.0
+            for node in gpu_info.get("nodes", []):
+                total_gpu_mem += node.get("per_gpu_memory_gb", 0) * max(node.get("allocatable_gpus", 0), 1)
+                total_disk += node.get("node_storage_gb", 0)
+
+            total_vram_required = 0.0
+            for m in model_info.get("models", []):
+                total_vram_required += m.get("estimated_vram_gb", 0)
+
+            if total_gpu_mem == 0:
+                total_gpu_mem = get_value("resources.gpu_memory_available_gb", 0)
+            if total_vram_required == 0:
+                total_vram_required = get_value("resources.gpu_memory_required_gb", 0)
+            if total_disk == 0:
+                total_disk = get_value("resources.disk_space_gb", 0)
+
+            resources = []
+            values = []
+            bar_colors = []
+            if total_gpu_mem > 0:
+                resources.append("GPU Memory (Available)")
+                values.append(round(total_gpu_mem, 2))
+                bar_colors.append("#00b894")
+            if total_vram_required > 0:
+                resources.append("GPU Memory (Required)")
+                values.append(round(total_vram_required, 2))
+                bar_colors.append("#fdcb6e")
+            if total_disk > 0:
+                resources.append("Node Storage (Total)")
+                values.append(round(total_disk, 2))
+                bar_colors.append("#0984e3")
+
+            if resources:
+                fig_resources = go.Figure()
+                fig_resources.add_trace(go.Bar(
+                    x=resources,
+                    y=values,
+                    marker_color=bar_colors,
+                    text=[f"{v} GB" for v in values],
+                    textposition='outside',
+                    hovertemplate="<b>%{x}</b><br>%{y} GB<extra></extra>"
+                ))
+                fig_resources.update_layout(
+                    title="Resource Usage Overview",
+                    xaxis_title="Resource Type",
+                    yaxis_title="Value (GB)",
+                    height=400,
+                    showlegend=False,
+                )
+                st.plotly_chart(fig_resources, use_container_width=True)
+            else:
+                st.info("No resource data available yet.")
         
         st.session_state.workflow_completed = True
         st.markdown("---")
@@ -1418,6 +1643,8 @@ else:
                             env["OC_LOGIN_COMMAND"] = st.session_state.oc_login_command
                         if st.session_state.vllm_runtime_image:
                             env["VLLM_RUNTIME_IMAGE"] = st.session_state.vllm_runtime_image
+                        if st.session_state.registry_host:
+                            env["REGISTRY_HOST"] = st.session_state.registry_host
                         if st.session_state.get("run_info_dir"):
                             env["AGENT_RUN_INFO_DIR"] = st.session_state.run_info_dir
                         
@@ -1468,7 +1695,7 @@ else:
 if st.session_state.agent_output_text:
     st.subheader("Full Agent Output")
     with st.expander("📋 Full Agent Output", expanded=False):
-        st.markdown(f"```\n{st.session_state.agent_output_text}\n```")
+        st.code(_strip_ansi(st.session_state.agent_output_text))
 st.markdown("---")
 st.markdown(
     """
