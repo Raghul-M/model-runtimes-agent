@@ -6,6 +6,7 @@ import tempfile
 import time
 import subprocess
 import re
+import base64
 from typing import List, Dict, Optional
 from datetime import datetime
 import plotly.graph_objects as go
@@ -18,12 +19,137 @@ from runtimes_dep_agent.utils.path_utils import detect_repo_root
 from runtimes_dep_agent.preflight import run_preflight_checks, preflight_ok
 from runtimes_dep_agent.report.html_report import generate_html_report
 
+_LOGO_PATH = Path(__file__).resolve().parent / "src" / "runtimes_dep_agent" / "report" / "openshift_ai_logo.png"
+
+
+def _load_logo_b64() -> str:
+    try:
+        return base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii")
+    except Exception:
+        return ""
+
+
 # Page configuration
 st.set_page_config(
-    page_title="Model Runtime Deployment Agent",
-    page_icon="🤖",
+    page_title="Model Runtimes Agent — OpenShift AI",
+    page_icon=":material/smart_toy:",
     layout="wide"
 )
+
+_THEME_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&family=Red+Hat+Text:wght@400;500;600&display=swap');
+
+:root {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --sidebar-bg: #1e2a38;
+    --sidebar-fg: #c8d6e5;
+    --text: #2d3436;
+    --text-muted: #636e72;
+    --border: #dfe6e9;
+    --accent: #0984e3;
+    --green: #00b894;
+    --red: #d63031;
+    --yellow: #fdcb6e;
+    --radius: 8px;
+}
+
+.stApp {
+    font-family: 'Red Hat Text', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: var(--surface);
+    border-right: 1px solid var(--border);
+}
+
+section[data-testid="stSidebar"] .stMarkdown h1,
+section[data-testid="stSidebar"] .stMarkdown h2,
+section[data-testid="stSidebar"] .stMarkdown h3 {
+    font-family: 'Red Hat Display', sans-serif;
+    color: var(--sidebar-bg);
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Red Hat Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--sidebar-bg);
+}
+
+.stProgress > div > div > div > div {
+    background-color: var(--accent);
+}
+
+div.stButton > button[kind="primary"] {
+    background-color: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-family: 'Red Hat Display', sans-serif;
+    letter-spacing: 0.3px;
+}
+
+div.stButton > button[kind="primary"]:hover {
+    background-color: #0773c7;
+    border: none;
+}
+
+div.stDownloadButton > button {
+    background-color: var(--sidebar-bg);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-family: 'Red Hat Display', sans-serif;
+}
+
+div.stDownloadButton > button:hover {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+}
+
+div[data-testid="stExpander"] {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+div[data-testid="stMetric"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+}
+
+div[data-testid="stMetric"] label {
+    color: var(--text-muted);
+    font-family: 'Red Hat Display', sans-serif;
+}
+
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    color: var(--sidebar-bg);
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 700;
+}
+
+.stTabs [data-baseweb="tab-list"] button {
+    font-family: 'Red Hat Display', sans-serif;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.stAlert {
+    border-radius: var(--radius);
+}
+</style>
+"""
+st.markdown(_THEME_CSS, unsafe_allow_html=True)
 
 # Initialize session state
 if "agent_started" not in st.session_state:
@@ -477,6 +603,14 @@ def parse_gpu_info():
 
 # Sidebar for API key and YAML upload
 with st.sidebar:
+    logo_b64 = _load_logo_b64()
+    if logo_b64:
+        st.markdown(
+            f'<div style="text-align:center;padding:8px 0 16px 0;">'
+            f'<img src="data:image/png;base64,{logo_b64}" alt="OpenShift AI" style="width:180px;">'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
     st.title("Configuration")
     
     # Gemini API Key input (mandatory)
@@ -491,9 +625,8 @@ with st.sidebar:
     
     if api_key_input:
         st.session_state.gemini_api_key = api_key_input
-        # Set as environment variable immediately so it's available to the agent
         os.environ["GEMINI_API_KEY"] = api_key_input
-        st.markdown('<span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Configured</span>', unsafe_allow_html=True)
+        st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Configured</span>', unsafe_allow_html=True)
     
     
     # OCI Registry Pull Secret input (mandatory)
@@ -507,9 +640,8 @@ with st.sidebar:
     
     if oci_secret_input:
         st.session_state.oci_pull_secret = oci_secret_input
-        # Set as environment variable immediately so it's available to the agent
         os.environ["OCI_REGISTRY_PULL_SECRET"] = oci_secret_input
-        st.markdown('<span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Configured</span>', unsafe_allow_html=True)
+        st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Configured</span>', unsafe_allow_html=True)
     
     st.divider()
     
@@ -526,7 +658,7 @@ with st.sidebar:
     
     if vllm_image_input:
         st.session_state.vllm_runtime_image = vllm_image_input
-        st.markdown('<span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Configured</span>', unsafe_allow_html=True)
+        st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Configured</span>', unsafe_allow_html=True)
     
     # Runtime Accelerator dropdown (optional)
     st.subheader("Runtime Accelerator")
@@ -552,7 +684,7 @@ with st.sidebar:
     # Update session state only if a valid option is selected (not placeholder)
     if runtime_backend_selected and runtime_backend_selected != "Select an option...":
         st.session_state.runtime_backend = runtime_backend_selected
-        st.markdown('<span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Selected</span>', unsafe_allow_html=True)
+        st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Selected</span>', unsafe_allow_html=True)
     elif runtime_backend_selected == "Select an option...":
         st.session_state.runtime_backend = None
     
@@ -570,7 +702,7 @@ with st.sidebar:
 
     if oc_login_input and oc_login_input.strip():
         st.session_state.oc_login_command = oc_login_input.strip()
-        st.markdown('<span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Configured</span>', unsafe_allow_html=True)
+        st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Configured</span>', unsafe_allow_html=True)
     else:
         st.session_state.oc_login_command = None
 
@@ -590,7 +722,7 @@ with st.sidebar:
             st.session_state.yaml_config = yaml.safe_load(yaml_content)
             # Store original YAML content to preserve exact format
             st.session_state.yaml_content_raw = yaml_content
-            st.markdown('<span style="background-color: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Loaded</span>', unsafe_allow_html=True)
+            st.markdown('<span style="background-color: #e6fcf5; color: #00b894; padding: 4px 10px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Loaded</span>', unsafe_allow_html=True)
             
             # Display YAML content in expander
             with st.expander("View YAML Configuration"):
@@ -640,19 +772,30 @@ with st.sidebar:
         }
         st.rerun()
 
-# Main interface
-st.title("🤖 Model Runtime Deployment Agent")
-
-# Badges for GitHub and Model Runtimes in RHOAI
+# Main interface — report-style header banner
 st.markdown("""
-<div style="margin-top: 8px;">
-    <a href="https://github.com" target="_blank" style="text-decoration: none; margin-right: 8px;">
-        <span style="background-color: #24292e; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; font-weight: 500; display: inline-block;">
+<div style="
+    background: #1e2a38;
+    color: #fff;
+    padding: 22px 32px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-family: 'Red Hat Display', -apple-system, BlinkMacSystemFont, sans-serif;
+">
+    <h1 style="margin:0; font-size:1.55rem; color:#fff; font-weight:700;">
+        Model Runtimes Agent &mdash; OpenShift AI
+    </h1>
+    <a href="https://github.com" target="_blank" style="text-decoration:none; margin-left:auto;">
+        <span style="background:#0984e3; color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; letter-spacing:0.3px;">
             GitHub Repo
         </span>
     </a>
-    <a href="#" target="_blank" style="text-decoration: none;">
-        <span style="background-color: #0066cc; color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; font-weight: 500; display: inline-block;">
+    <a href="#" target="_blank" style="text-decoration:none;">
+        <span style="background:#00b894; color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; letter-spacing:0.3px;">
             Model Runtimes in RHOAI
         </span>
     </a>
@@ -716,12 +859,12 @@ if not st.session_state.agent_started:
         if r["installed"]:
             ver = f" ({r['version']})" if r["version"] else ""
             st.markdown(
-                f'<span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; margin-right: 8px;">{r["name"]} &#10003;{ver}</span>',
+                f'<span style="background-color: #00b894; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600; margin-right: 8px;">{r["name"]} &#10003;{ver}</span>',
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
-                f'<span style="background-color: #dc3545; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; margin-right: 8px;">{r["name"]} &#10007; NOT FOUND</span>',
+                f'<span style="background-color: #d63031; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600; margin-right: 8px;">{r["name"]} &#10007; NOT FOUND</span>',
                 unsafe_allow_html=True,
             )
 else:
@@ -731,15 +874,15 @@ else:
     
     with col1:
         if st.session_state.gemini_api_key:
-            st.markdown('<span style="background-color: #28a745; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; font-weight: 500;">Gemini API Key: Verified</span>', unsafe_allow_html=True)
+            st.markdown('<span style="background-color: #00b894; color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Gemini API Key: Verified</span>', unsafe_allow_html=True)
         else:
-            st.markdown('<span style="background-color: #dc3545; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; font-weight: 500;">Gemini API Key: Not configured</span>', unsafe_allow_html=True)
+            st.markdown('<span style="background-color: #d63031; color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Gemini API Key: Not configured</span>', unsafe_allow_html=True)
     
     with col2:
         if st.session_state.oci_pull_secret:
-            st.markdown('<span style="background-color: #28a745; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; font-weight: 500;">OCI Pull Secret: Verified</span>', unsafe_allow_html=True)
+            st.markdown('<span style="background-color: #00b894; color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">OCI Pull Secret: Verified</span>', unsafe_allow_html=True)
         else:
-            st.markdown('<span style="background-color: #dc3545; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; font-weight: 500;">OCI Pull Secret: Not configured</span>', unsafe_allow_html=True)
+            st.markdown('<span style="background-color: #d63031; color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">OCI Pull Secret: Not configured</span>', unsafe_allow_html=True)
     
     
     # Workflow progress
@@ -775,11 +918,11 @@ else:
             st.markdown(f"{step['name']}")
         with col2:
             if step["status"] == "completed":
-                st.markdown('<span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">Completed</span>', unsafe_allow_html=True)
+                st.markdown('<span style="background-color: #00b894; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Completed</span>', unsafe_allow_html=True)
             elif step["status"] == "in_progress":
-                st.markdown('<span style="background-color: #007bff; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">In Progress</span>', unsafe_allow_html=True)
+                st.markdown('<span style="background-color: #0984e3; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">In Progress</span>', unsafe_allow_html=True)
             else:
-                st.markdown('<span style="background-color: #6c757d; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">Pending</span>', unsafe_allow_html=True)
+                st.markdown('<span style="background-color: #636e72; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Pending</span>', unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -813,8 +956,8 @@ else:
             
             # Display number of models at the top
             st.markdown(f"""
-            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 16px; background-color: #f8f9fa;">
-            <p style="font-size: 1.2em; font-weight: bold; color: #28a745;">Number of models found in Modelcar YAML: {num_models}</p>
+            <div style="border: 1px solid #dfe6e9; border-radius: 8px; padding: 16px; margin-bottom: 16px; background-color: #f5f6fa;">
+            <p style="font-size: 1.15em; font-weight: 700; color: #00b894; font-family: 'Red Hat Display', sans-serif;">Number of models found in Modelcar YAML: {num_models}</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -823,10 +966,10 @@ else:
                 with st.expander("Model Details", expanded=False):
                     for idx, model in enumerate(models, 1):
                         st.markdown(f"""
-                        <div style="padding: 12px; margin-bottom: 16px; background-color: #f8f9fa; border-radius: 4px; border-left: 4px solid #28a745;">
-                        <h4 style="margin-top: 0; margin-bottom: 12px; color: #28a745;">Model {idx}: {model.get('name', 'Unknown')}</h4>
-                        <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0;">
-                        <li><strong>Model Name</strong>: <code>{model.get('name', 'Unknown')}</code></li>
+                        <div style="padding: 18px; margin-bottom: 16px; background-color: #f5f6fa; border-radius: 8px; border: 1px solid #dfe6e9; border-left: 4px solid #0984e3;">
+                        <h4 style="margin-top: 0; margin-bottom: 12px; color: #0984e3; font-family: 'Red Hat Display', sans-serif; font-size: 0.95rem;">Model {idx}: {model.get('name', 'Unknown')}</h4>
+                        <ul style="list-style-type: none; padding-left: 0; margin-bottom: 0; font-size: 0.88rem; line-height: 1.8;">
+                        <li><strong>Model Name</strong>: <code style="background:#eef1f5; padding:2px 6px; border-radius:4px; font-size:0.82rem; color:#d63031;">{model.get('name', 'Unknown')}</code></li>
                         <li><strong>Image</strong>: {model.get('image', 'Not specified')}</li>
                         <li><strong>Image Size</strong>: {model.get('image_size_gb', 0.0)} GB</li>
                         <li><strong>Parameter Count</strong>: {model.get('parameter_count', 'Not specified')}</li>
@@ -859,10 +1002,10 @@ else:
             total_gpus = gpu_info["total_gpus"]
             
             st.markdown(f"""
-            <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 16px; background-color: #f8f9fa;">
-            <h3>Accelerator Summary</h3>
-            <p style="font-size: 1.2em; font-weight: bold; color: #28a745; margin-bottom: 8px;">Total Number of GPU Nodes: {total_nodes}</p>
-            <p style="font-size: 1.1em; font-weight: bold; color: #28a745; margin-bottom: 12px;">Total Number of GPUs Available: {total_gpus}</p>
+            <div style="border: 1px solid #dfe6e9; border-radius: 8px; padding: 20px; margin-bottom: 16px; background-color: #f5f6fa;">
+            <h3 style="font-family: 'Red Hat Display', sans-serif; color: #1e2a38; margin-bottom: 12px;">Accelerator Summary</h3>
+            <p style="font-size: 1.15em; font-weight: 700; color: #00b894; margin-bottom: 6px;">Total Number of GPU Nodes: {total_nodes}</p>
+            <p style="font-size: 1.05em; font-weight: 700; color: #00b894; margin-bottom: 0;">Total Number of GPUs Available: {total_gpus}</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -873,8 +1016,8 @@ else:
                     
                     with st.expander(f"GPU Node {idx} Details - {node['node_name']}", expanded=False):
                         st.markdown(f"""
-                        <div style="padding: 12px; background-color: #f8f9fa; border-radius: 4px;">
-                        <ul style="list-style-type: none; padding-left: 0;">
+                        <div style="padding: 18px; background-color: #f5f6fa; border-radius: 8px; border: 1px solid #dfe6e9;">
+                        <ul style="list-style-type: none; padding-left: 0; font-size: 0.88rem; line-height: 1.8;">
                         <li><strong>Node Name</strong>: {node['node_name']}</li>
                         <li><strong>Status</strong>: {accelerator_status}</li>
                         <li><strong>Cloud Provider</strong>: {node['cloud_provider']}</li>
@@ -923,9 +1066,8 @@ else:
                 # Extract verdict for card and expander label from deployment_info.txt
                 # Parse the actual format from the file (e.g., "### Deployment Decision: NO-GO" or "**Verdict: GO**")
                 verdict = "GO"
-                verdict_color = "#28a745"  # Green for GO
+                verdict_color = "#00b894"
                 
-                # Check for NO-GO patterns (case-insensitive)
                 deployment_info_upper = deployment_info_text.upper()
                 if any(pattern in deployment_info_upper for pattern in [
                     "DEPLOYMENT DECISION: NO-GO",
@@ -936,14 +1078,14 @@ else:
                     "**VERDICT: NO GO**"
                 ]):
                     verdict = "NO-GO"
-                    verdict_color = "#dc3545"  # Red for NO-GO
+                    verdict_color = "#d63031"
                 elif any(pattern in deployment_info_upper for pattern in [
                     "DEPLOYMENT DECISION: GO",
                     "VERDICT: GO",
                     "**VERDICT: GO**"
                 ]):
                     verdict = "GO"
-                    verdict_color = "#28a745"  # Green for GO
+                    verdict_color = "#00b894"
                 
                 # Display in expandable dropdown
                 with st.expander(f"Deployment Decision Details", expanded=False):
@@ -964,24 +1106,30 @@ else:
 
         col_deployable, col_blocked = st.columns(2)
         with col_deployable:
-            st.markdown("**Deployable Models**")
+            st.markdown("**Deployable**")
             if deployable:
                 for entry in deployable:
                     st.markdown(
-                        f"- ✅ `{entry['model_name']}` — {entry['reason']}"
+                        f'<div style="background:#e6fcf5; border-left:4px solid #00b894; padding:12px 16px; border-radius:8px; margin-bottom:8px; font-size:0.88rem;">'
+                        f'&#10003; <strong>{entry["model_name"]}</strong><br>'
+                        f'<small style="color:#636e72;">{entry["reason"]}</small></div>',
+                        unsafe_allow_html=True,
                     )
             else:
-                st.markdown("_None listed._")
+                st.markdown("_None_")
 
         with col_blocked:
-            st.markdown("**Non-deployable Models**")
+            st.markdown("**Non-deployable**")
             if blocked:
                 for entry in blocked:
                     st.markdown(
-                        f"- ⚠️ `{entry['model_name']}` — {entry['reason']}"
+                        f'<div style="background:#ffeaea; border-left:4px solid #d63031; padding:12px 16px; border-radius:8px; margin-bottom:8px; font-size:0.88rem;">'
+                        f'&#10007; <strong>{entry["model_name"]}</strong><br>'
+                        f'<small style="color:#636e72;">{entry["reason"]}</small></div>',
+                        unsafe_allow_html=True,
                     )
             else:
-                st.markdown("_None listed._")
+                st.markdown("_None_")
 
         st.markdown("---")
     
@@ -996,21 +1144,20 @@ else:
         if qa_status == "pending" and agent_output:
             qa_message = "QA validation information is being processed. Please check the full agent output for details."
         
-        # Determine color based on status
         if qa_status == "passed" or qa_status == "completed":
-            status_color = "#28a745"  # Green
+            status_color = "#00b894"
         elif qa_status == "failed":
-            status_color = "#dc3545"  # Red
+            status_color = "#d63031"
         elif qa_status == "skipped":
-            status_color = "#ffc107"  # Yellow
+            status_color = "#e17055"
         else:
-            status_color = "#6c757d"  # Gray for pending/unknown
+            status_color = "#636e72"
         
         st.markdown(f"""
-        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; max-height: 300px; overflow-y: auto; background-color: #f8f9fa;">
-        <h3>QA Validation</h3>
-        <p><strong>Status:</strong> <span style="color: {status_color}; font-weight: bold;">{qa_status.upper()}</span></p>
-        <p>{qa_message}</p>
+        <div style="border: 1px solid #dfe6e9; border-radius: 8px; padding: 20px; max-height: 300px; overflow-y: auto; background-color: #f5f6fa;">
+        <h3 style="font-family: 'Red Hat Display', sans-serif; color: #1e2a38; margin-bottom: 10px;">QA Validation</h3>
+        <p><strong>Status:</strong> <span style="color: {status_color}; font-weight: 700;">{qa_status.upper()}</span></p>
+        <p style="font-size: 0.88rem; line-height: 1.7; color: #2d3436;">{qa_message}</p>
         </div>
         """, unsafe_allow_html=True)
         st.markdown("---")
@@ -1052,7 +1199,7 @@ else:
         with col2:
             st.metric("Time Taken", f"{elapsed_time:.2f} seconds")
         
-        st.markdown('<div style="margin-top: 20px;"><span style="background-color: #28a745; color: white; padding: 8px 16px; border-radius: 4px; font-size: 0.95em; font-weight: 500;">Deployment completed successfully</span></div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-top: 20px;"><span style="background-color: #00b894; color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Deployment completed successfully</span></div>', unsafe_allow_html=True)
 
         # Generate and offer HTML report download (unique temp file per run to avoid cross-session races)
         try:
@@ -1152,7 +1299,7 @@ else:
                 })
             
             fig_timeline = go.Figure()
-            colors = ['#28a745', '#007bff', '#17a2b8', '#ffc107', '#28a745', '#6c757d']
+            colors = ['#00b894', '#0984e3', '#1e2a38', '#fdcb6e', '#00b894', '#636e72']
             
             for i, row in agent_data.iterrows():
                 # Format duration text: show in minutes if > 99 seconds
@@ -1202,7 +1349,7 @@ else:
             fig_resources.add_trace(go.Bar(
                 x=resource_data['Resource'],
                 y=resource_data['Value'],
-                marker_color=['#28a745', '#ffc107', '#17a2b8'],
+                marker_color=['#00b894', '#fdcb6e', '#0984e3'],
                 text=[f"{v} {u}" for v, u in zip(resource_data['Value'], resource_data['Unit'])],
                 textposition='outside',
                 hovertemplate="<b>%{x}</b><br>Value: %{y} GB<extra></extra>"
@@ -1323,12 +1470,12 @@ if st.session_state.agent_output_text:
     with st.expander("📋 Full Agent Output", expanded=False):
         st.markdown(f"```\n{st.session_state.agent_output_text}\n```")
 st.markdown("---")
-# Footer at the bottom
 st.markdown(
     """
-    <div style='text-align: center; color: gray; padding-top: 20px;'>
-        <small><strong>Model Runtime Deployment Agent</strong> | Powered by Model Runtimes Team ( RHOAI )</small>
+    <div style="text-align: center; color: #636e72; font-size: 0.78rem; padding: 24px 0 8px 0; font-family: 'Red Hat Text', sans-serif;">
+        Model Runtimes Agent &bull; Red Hat OpenShift AI &bull; Developed by
+        <a href="https://github.com/Raghul-M" target="_blank" style="color: #0984e3; text-decoration: none; font-weight: 600;">Raghul M</a>
     </div>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
