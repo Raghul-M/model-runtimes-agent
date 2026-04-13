@@ -88,6 +88,9 @@ Pipfile.lock
 # poetry
 poetry.lock
 
+#uv
+uv.lock
+
 # pdm
 .pdm.toml
 
@@ -158,9 +161,6 @@ Desktop.ini
 
 # Generated config files (keep base templates)
 config-yaml/*.generated.yaml
-
-# Demo/example log files
-demo-logs/
 
 
 # Streamlit

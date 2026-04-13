@@ -5,6 +5,8 @@ import shlex
 import tempfile
 import time
 import subprocess
+import shutil
+import webbrowser
 import re
 import base64
 from typing import List, Dict, Optional
@@ -381,6 +383,65 @@ def _get_info_dir() -> Path:
         return Path(run_dir)
     return Path(detect_repo_root([Path(__file__).resolve()]), "info")
 
+
+def _agent_subprocess_is_running() -> bool:
+    """True while the first workflow step is waiting for CLI output (subprocess active)."""
+    return (
+        st.session_state.workflow_step == 1
+        and not st.session_state.workflow_completed
+        and not st.session_state.agent_command_output
+    )
+
+
+def _prepare_rerun_from_session() -> None:
+    """
+    Reset run-scoped workflow state so the supervisor runs again with the same
+    sidebar inputs (API key, pull secret, YAML, oc login, registry, etc.).
+    """
+    old_run = st.session_state.get("run_info_dir")
+    if old_run:
+        p = Path(old_run)
+        if p.exists():
+            try:
+                shutil.rmtree(p, ignore_errors=True)
+            except OSError:
+                pass
+    st.session_state.run_info_dir = None
+    st.session_state.workflow_completed = False
+    st.session_state.workflow_step = 1
+    st.session_state.agent_command_output = None
+    st.session_state.agent_output_text = None
+    st.session_state.agent_start_time = None
+    st.session_state.agent_timestamps = {
+        "supervisor": None,
+        "configuration": None,
+        "accelerator": None,
+        "deployment": None,
+        "qa": None,
+    }
+    st.session_state.agent_result = None
+    st.session_state.agent_interrupted = False
+    st.session_state.agent_pid = None
+    st.session_state.start_time = time.time()
+    st.session_state.pop("last_html_report_path", None)
+
+    if st.session_state.gemini_api_key:
+        os.environ["GEMINI_API_KEY"] = st.session_state.gemini_api_key
+    if st.session_state.oci_pull_secret:
+        os.environ["OCI_REGISTRY_PULL_SECRET"] = st.session_state.oci_pull_secret
+
+    if not st.session_state.yaml_config:
+        raise ValueError("No YAML configuration in session; upload a modelcar YAML before rerunning.")
+
+    temp_dir = tempfile.gettempdir()
+    config_path = os.path.join(temp_dir, f"modelcar_config_rerun_{int(time.time() * 1000)}.yaml")
+    with open(config_path, "wb") as tmp_file:
+        if getattr(st.session_state, "yaml_content_raw", None):
+            tmp_file.write(st.session_state.yaml_content_raw)
+        else:
+            yaml.dump(st.session_state.yaml_config, tmp_file, default_flow_style=False)
+    st.session_state.config_path = config_path
+
 # Helper function to get value from extracted data with fallback
 def get_value(path: str, default):
     """Get nested value from extracted_data using dot notation path."""
@@ -681,14 +742,14 @@ def extract_qa_summary(agent_output: str) -> tuple[str, str]:
                 if not qa_summary.endswith(('.', '!', '?')):
                     qa_summary += '.'
     
-    # Determine status from summary
+    # Determine status from summary (fail before pass so "failed to …" does not match "success")
     qa_summary_lower = qa_summary.lower()
     if any(word in qa_summary_lower for word in ['not run', 'skipped', 'no-go', 'no go']):
         status = "skipped"
+    elif any(word in qa_summary_lower for word in ['fail', 'error', 'failed', 'qa_error']):
+        status = "failed"
     elif any(word in qa_summary_lower for word in ['pass', 'success', 'passed', 'completed successfully']):
         status = "passed"
-    elif any(word in qa_summary_lower for word in ['fail', 'error', 'failed']):
-        status = "failed"
     else:
         status = "completed"
     
@@ -702,6 +763,28 @@ def extract_qa_summary(agent_output: str) -> tuple[str, str]:
             qa_summary = qa_summary[:500] + "..."
     
     return status, qa_summary
+
+
+def deployment_success_badge_ok(agent_output: str, qa_status: str) -> bool:
+    """
+    Whether to show a successful deployment banner. Requires a clear QA pass
+    (not failed, not skipped — e.g. NO-GO or Podman issues count as non-success).
+    """
+    out = agent_output or ""
+    out_u = out.upper()
+    # Tool-level failures (Podman missing, engine unreachable, etc.)
+    if "QA_ERROR:RUNTIME_NOT_FOUND" in out_u or "QA_ERROR:RUNTIME" in out_u:
+        return False
+    if "RUNTIME_NOT_FOUND" in out_u and "PODMAN" in out_u:
+        return False
+    if qa_status in ("failed", "skipped", "pending"):
+        return False
+    if qa_status == "passed":
+        return True
+    if qa_status == "completed" and "QA_OK" in out:
+        return True
+    return False
+
 
 # Function to parse GPU info from gpu_info.txt
 def parse_gpu_info():
@@ -1040,17 +1123,41 @@ if not st.session_state.agent_started:
         with st.spinner("Checking dependencies..."):
             results = run_preflight_checks(quiet=True)
             st.session_state.preflight_results = [
-                {"name": r.name, "installed": r.installed, "version": r.version, "path": r.path}
+                {
+                    "name": r.name,
+                    "installed": r.installed,
+                    "version": r.version,
+                    "path": r.path,
+                    **({"running": r.running} if r.running is not None else {}),
+                    **({"running_detail": r.running_detail} if r.running_detail else {}),
+                }
                 for r in results
             ]
     _preflight_badges = ""
     for r in st.session_state.preflight_results:
-        if r["installed"]:
+        podman_down = (
+            r.get("name") == "podman"
+            and r.get("installed")
+            and r.get("running") is False
+        )
+        if r["installed"] and not podman_down:
             ver = f" ({r['version']})" if r["version"] else ""
+            extra = ""
+            if r.get("name") == "podman" and r.get("running") is True:
+                extra = " · engine OK"
             _preflight_badges += (
                 f'<span style="background-color: #00b894; color: white; padding: 5px 14px; border-radius: 20px; '
                 f'font-size: 0.82rem; font-weight:600; margin-right: 8px; display:inline-block;">'
-                f'{r["name"]} &#10003;{ver}</span>'
+                f'{r["name"]} &#10003;{ver}{extra}</span>'
+            )
+        elif podman_down:
+            ver = f" ({r['version']})" if r["version"] else ""
+            hint = r.get("running_detail") or "Start Podman (e.g. podman machine start on macOS)."
+            _preflight_badges += (
+                f'<span style="background-color: #e17055; color: white; padding: 5px 14px; border-radius: 20px; '
+                f'font-size: 0.82rem; font-weight:600; margin-right: 8px; display:inline-block;" '
+                f'title="{hint}">'
+                f'{r["name"]} &#10007; INSTALLED · ENGINE DOWN{ver}</span>'
             )
         else:
             _preflight_badges += (
@@ -1145,7 +1252,25 @@ else:
                 st.markdown('<span style="background-color: #0984e3; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">In Progress</span>', unsafe_allow_html=True)
             else:
                 st.markdown('<span style="background-color: #636e72; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82rem; font-weight:600;">Pending</span>', unsafe_allow_html=True)
-    
+
+    _rerun_busy = _agent_subprocess_is_running()
+    _rerun_cols = st.columns([2, 2, 6])
+    with _rerun_cols[0]:
+        if st.button(
+            "Rerun with same configuration",
+            help="Runs the supervisor again using the current sidebar API key, OCI pull secret, YAML, and optional oc login — without clearing those fields.",
+            disabled=_rerun_busy,
+            key="rerun_same_config_btn",
+        ):
+            try:
+                _prepare_rerun_from_session()
+                st.rerun()
+            except ValueError as exc:
+                st.error(str(exc))
+    with _rerun_cols[1]:
+        if _rerun_busy:
+            st.caption("Finish or stop the current run to enable Rerun.")
+
     st.markdown("---")
     
     # Show loader/spinner above all outputs when agent is running
@@ -1411,6 +1536,8 @@ else:
     if st.session_state.workflow_step >= 5:
         st.subheader("Summary")
         elapsed_time = time.time() - st.session_state.start_time
+        agent_out_summary = st.session_state.agent_output_text or ""
+        qa_status_summary, _ = extract_qa_summary(agent_out_summary)
         # Count only deployable models from deployment_matrix.json
         deployment_matrix_entries = load_deployment_matrix()
         deployable_models = [entry for entry in deployment_matrix_entries if entry.get("deployable", False)]
@@ -1423,31 +1550,80 @@ else:
             elapsed_minutes = elapsed_time / 60
             st.metric("Time Taken", f"{elapsed_minutes:.2f} minutes")
         
-        st.markdown('<div style="margin-top: 20px;"><span style="background-color: #00b894; color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Deployment completed successfully</span></div>', unsafe_allow_html=True)
+        qa_ok_badge = deployment_success_badge_ok(agent_out_summary, qa_status_summary)
+        if qa_ok_badge:
+            st.markdown(
+                '<div style="margin-top: 20px;"><span style="background-color: #00b894; color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Deployment completed successfully</span></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                """
+                <div style="margin-top: 20px; width: 100%; box-sizing: border-box; padding: 18px 22px; border-radius: 12px; border: 1px solid #fadbd8;
+                border-left: 4px solid #e17055; background: linear-gradient(135deg, #fffbf9 0%, #f8f9fa 100%);
+                box-shadow: 0 2px 8px rgba(30, 42, 56, 0.06);">
+                <div style="display: flex; align-items: flex-start; gap: 16px;">
+                <span style="flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+                width: 36px; height: 36px; border-radius: 50%; background: #fde8e4; color: #c0392b;
+                font-weight: 800; font-size: 1rem; font-family: 'Red Hat Display', sans-serif;" aria-hidden="true">!</span>
+                <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 700; color: #c0392b; font-size: 1rem; letter-spacing: -0.02em;
+                font-family: 'Red Hat Display', sans-serif;">QA did not complete successfully</div>
+                </div></div></div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         st.markdown('<div style="margin-top: 1.5rem;"></div>', unsafe_allow_html=True)
 
-        # Generate and offer HTML report download (unique temp file per run to avoid cross-session races)
+        # Generate HTML report to the run info dir (View Report opens this file in the browser)
         try:
-            fd, report_tmp_path = tempfile.mkstemp(suffix=".html", prefix="agent_report_")
-            os.close(fd)
-            report_tmp = Path(report_tmp_path)
-            try:
-                generate_html_report(
-                    info_dir=_get_info_dir(),
-                    output_path=report_tmp,
-                    agent_output=st.session_state.agent_output_text,
-                    preflight_results=st.session_state.preflight_results,
-                )
-                report_html = report_tmp.read_text(encoding="utf-8")
+            info_dir = _get_info_dir()
+            info_dir.mkdir(parents=True, exist_ok=True)
+            report_path = info_dir / "ui_report.html"
+            generate_html_report(
+                info_dir=info_dir,
+                output_path=report_path,
+                agent_output=st.session_state.agent_output_text,
+                preflight_results=st.session_state.preflight_results,
+            )
+            st.session_state["last_html_report_path"] = str(report_path.resolve())
+            report_html = report_path.read_text(encoding="utf-8")
+            # All three actions on one row (tight horizontal gap)
+            col_dl, col_view, col_rerun = st.columns(3, gap="xxsmall")
+            with col_dl:
                 st.download_button(
                     label="Download HTML Report",
                     data=report_html,
                     file_name="report.html",
                     mime="text/html",
+                    use_container_width=True,
                 )
-            finally:
-                report_tmp.unlink(missing_ok=True)
+            with col_view:
+                if st.button(
+                    "View Report",
+                    help="Opens the HTML report in your default browser (local Streamlit only).",
+                    use_container_width=True,
+                    key="view_report_summary_btn",
+                ):
+                    rp = st.session_state.get("last_html_report_path")
+                    if rp and Path(rp).is_file():
+                        webbrowser.open(Path(rp).resolve().as_uri())
+                    else:
+                        st.warning("Report file is not available yet.")
+            with col_rerun:
+                if st.button(
+                    "Rerun",
+                    help="Run the supervisor again with the same sidebar inputs (new artifact directory).",
+                    disabled=_agent_subprocess_is_running(),
+                    key="rerun_from_summary_btn",
+                    use_container_width=True,
+                ):
+                    try:
+                        _prepare_rerun_from_session()
+                        st.rerun()
+                    except ValueError as exc:
+                        st.error(str(exc))
         except Exception as report_exc:
             st.warning(f"Could not generate report: {report_exc}")
         

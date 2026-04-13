@@ -297,8 +297,28 @@ def _section_preflight(results: list[dict] | None) -> str:
         return ""
     rows = ""
     for r in results:
-        icon = '<span class="status-pass">&#10003; Installed</span>' if r.get("installed") else '<span class="status-fail">&#10007; Not Found</span>'
-        rows += f"<tr><td><code>{_esc(r.get('name', ''))}</code></td><td>{icon}</td><td>{_esc(r.get('version', ''))}</td><td><code>{_esc(r.get('path', ''))}</code></td></tr>\n"
+        name = r.get("name", "")
+        podman_engine_down = (
+            name == "podman"
+            and r.get("installed")
+            and r.get("running") is False
+        )
+        if r.get("installed") and not podman_engine_down:
+            engine = ""
+            if name == "podman" and r.get("running") is True:
+                engine = " <span class=\"status-pass\">Engine OK</span>"
+            icon = f'<span class="status-pass">&#10003; Installed</span>{engine}'
+        elif podman_engine_down:
+            detail = _esc(r.get("running_detail") or "")
+            icon = (
+                '<span class="status-pass">&#10003; Installed</span> '
+                '<span class="status-fail">&#10007; Engine not reachable</span>'
+            )
+            if detail:
+                icon += f' <span class="muted">({detail})</span>'
+        else:
+            icon = '<span class="status-fail">&#10007; Not Found</span>'
+        rows += f"<tr><td><code>{_esc(name)}</code></td><td>{icon}</td><td>{_esc(r.get('version', ''))}</td><td><code>{_esc(r.get('path', ''))}</code></td></tr>\n"
     return f"""
     <section id="preflight">
       <h2>Pre-flight Checks</h2>
