@@ -819,7 +819,6 @@ def _deployment_output_has_nogo(agent_output: str) -> bool:
     patterns = (
         r"deployment\s+decision\s*:\s*no-?\s*go\b",
         r"verdict\s*:\s*no-?\s*go\b",
-        r"deployment\s*:\s*no-?\s*go\b",
     )
     return any(re.search(p, s) for p in patterns)
 
@@ -830,7 +829,6 @@ def _deployment_output_has_explicit_go(agent_output: str) -> bool:
     patterns = (
         r"deployment\s+decision\s*:\s*go\b",
         r"verdict\s*:\s*go\b",
-        r"deployment\s*:\s*go\b",
     )
     return any(re.search(p, s) for p in patterns)
 
